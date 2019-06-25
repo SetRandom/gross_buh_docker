@@ -1,0 +1,6 @@
+*.pem
+
+./app/app/*.py
+./app/app/*.pem
+
+./db/data

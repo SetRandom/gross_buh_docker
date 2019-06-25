@@ -1,0 +1,46 @@
+version: "3"
+services:
+  app:
+    build: 
+      ./app
+    ports: 
+      - 8011:8011
+    depends_on:
+      - db
+      - broker
+    links: 
+      - db
+      - broker
+    restart: on-failure
+  db:
+    build: 
+      ./db
+    restart: always
+    environment:
+      - "CREATE_DB_USER=grossbuh"
+      - "CREATE_DB_PASSWORD=grossbuh123456"
+      - "CREATE_DB_DATABASE=grossbuh"
+      - "POSTGRES_PASSWORD=grossbuh_simple_passwd"
+    volumes: 
+      - ./db/data:/var/lib/postgresql/data
+  celery:
+    build: 
+      ./app
+    links: 
+      - db
+      - broker
+    command: celery -A celery_worker worker -B -l info
+    depends_on:
+      - db
+      - broker
+      - app
+    restart: on-failure
+  broker:
+    image: rabbitmq:3-alpine
+    restart: on-failure
+    environment:
+      - "RABBITMQ_ERLANG_COOKIE=GRSSVQEGKIFFTRSSQRT"
+      - "RABBITMQ_DEFAULT_USER=grossbuh"
+      - "RABBITMQ_DEFAULT_PASS=grossbuh123456"
+      - "RABBITMQ_DEFAULT_VHOST=/"
+
